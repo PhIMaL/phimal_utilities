@@ -1,4 +1,14 @@
-import numpy as np
+import torch
+
+
+def pytorch_func(function):
+    '''Decorator to automatically transform arrays to tensors and back'''
+    def wrapper(self, *args, **kwargs):
+        torch_args = [torch.tensor(arg, requires_grad=True, dtype=torch.float64) for arg in args]
+        torch_kwargs = {key: torch.tensor(kwarg, requires_grad=True, dtype=torch.float64) for key, kwarg in kwargs.items()}
+        result = function(self, *torch_args, **torch_kwargs)
+        return result.detach().numpy()
+    return wrapper
 
 
 class Dataset:
@@ -6,27 +16,27 @@ class Dataset:
         self.solution = solution  # set solution
         self.parameters = kwargs  # set solution parameters
 
-    def solution(self, x, t):
+    @pytorch_func
+    def generate_solution(self, x, t):
         '''Generation solution.'''
-        return self.data(output=0, coordinate=0, order=0)(x, t, **self.parameters)
+        u = self.solution(x, t, **self.parameters)
+        return u
 
-    def data(self, output, coordinate, order):
-        '''Simple wrapper function which makes it easier to grab the right function
-        from the solution instance.'''
-        return getattr(self.solution, f'u_{output}_{coordinate}_{order}')
+    @pytorch_func
+    def time_deriv(self, x, t):
+        u = self.solution(x, t, **self.parameters)
+        u_t = torch.autograd.grad(u, t, torch.ones_like(u))[0]
+        return u_t
 
+    @pytorch_func
     def library(self, x, t):
         ''' Returns library with 3rd order derivs and 2nd order polynomial'''
-        u = self.data(output=0, coordinate=0, order=0)(x, t, **self.parameters)
-        u_x = self.data(output=0, coordinate=1, order=1)(x, t, **self.parameters)
-        u_xx = self.data(output=0, coordinate=1, order=2)(x, t, **self.parameters)
-        u_xxx = self.data(output=0, coordinate=1, order=3)(x, t, **self.parameters)
+        u = self.solution(x, t, **self.parameters)
+        u_x = torch.autograd.grad(u, x, torch.ones_like(u), create_graph=True)[0]
+        u_xx = torch.autograd.grad(u_x, x, torch.ones_like(u_x), create_graph=True)[0]
+        u_xxx = torch.autograd.grad(u_xx, x, torch.ones_like(u_xx))[0]
 
-        derivs = np.concatenate([np.ones_like(u), u_x, u_xx, u_xxx], axis=1)
-        theta = np.concatenate([derivs, u * derivs, u**2 * derivs], axis=1)
+        derivs = torch.cat([torch.ones_like(u), u_x, u_xx, u_xxx], dim=1)
+        theta = torch.cat([derivs, u * derivs, u**2 * derivs], dim=1)
 
         return theta
-
-    def time_deriv(self, x, t):
-        ''' Return time derivative'''
-        return self.data(output=0, coordinate=0, order=1)(x, t, **self.parameters)

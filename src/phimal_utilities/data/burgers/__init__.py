@@ -1,1 +1,1 @@
-from .deltapeak import BurgersDelta
+from .burgers import BurgersDelta

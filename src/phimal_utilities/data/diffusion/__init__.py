@@ -1,1 +1,1 @@
-from .gaussian import DiffusionGaussian
+from .diffusion import DiffusionGaussian

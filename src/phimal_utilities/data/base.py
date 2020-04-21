@@ -11,6 +11,8 @@ class Dataset:
         return self.data(output=0, coordinate=0, order=0)(x, t, **self.parameters)
 
     def data(self, output, coordinate, order):
+        '''Simple wrapper function which makes it easier to grab the right function
+        from the solution instance.'''
         return getattr(self.solution, f'u_{output}_{coordinate}_{order}')
 
     def library(self, x, t):

@@ -5,8 +5,8 @@ from numpy import ndarray
 def pytorch_func(function):
     '''Decorator to automatically transform arrays to tensors and back'''
     def wrapper(self, *args, **kwargs):
-        torch_args = [torch.tensor(arg, requires_grad=True, dtype=torch.float64) for arg in args if type(arg) is ndarray]
-        torch_kwargs = {key: torch.tensor(kwarg, requires_grad=True, dtype=torch.float64) for key, kwarg in kwargs.items() if type(kwarg) is ndarray}
+        torch_args = [torch.tensor(arg, requires_grad=True, dtype=torch.float64) if type(arg) is ndarray else arg for arg in args]
+        torch_kwargs = {key: torch.tensor(kwarg, requires_grad=True, dtype=torch.float64) if type(kwarg) is ndarray else kwarg for key, kwarg in kwargs.items()}
         result = function(self, *torch_args, **torch_kwargs)
         return result.detach().numpy()
     return wrapper

@@ -4,7 +4,8 @@
 
 import numpy as np
 from phimal_utilities.data import Dataset
-from phimal_utilities.data.burgers import BurgersSawtooth, BurgersDelta, BurgersCos, BurgersDiscontinuous
+from phimal_utilities.data.burgers import BurgersSawtooth, BurgersDelta, BurgersCos
+
 
 def test_solution(dataset, v, x=None, t=None):
     if x is None:
@@ -26,11 +27,11 @@ def test_solution(dataset, v, x=None, t=None):
 v = 0.1
 #dataset = Dataset(BurgersDelta, v=v, A=1.0)
 #dataset = Dataset(BurgersCos, v=v, a=0.1, b=0.1, k=2)
-#dataset = Dataset(BurgersDiscontinuous, v=v, a=0.5, b=0.1)
-dataset = Dataset(BurgersSawtooth, v=v)
+#dataset = Dataset(BurgersSawtooth, v=v)
 
 x_saw = np.linspace(0, 2*np.pi, 50) # saw tooth only valid on specific domain
 t_saw = np.linspace(0.0, 0.5, 20)
 
 # Actual test
-assert test_solution(dataset, v=v, x=x_saw, t=t_saw)[0] is True, 'Calculated coefficients not correct.'
+assert test_solution(dataset, v=v)[0] is True, 'Calculated coefficients not correct.'
+print('Test succesfully run')

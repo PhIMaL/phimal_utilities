@@ -43,16 +43,3 @@ def BurgersSawtooth(x, t, v):
     dphi_x = - 2 * z_left / l * torch.exp(-z_left**2 / l) - 2 * z_right / l * torch.exp(-z_right**2 / l)
     u = -2 * v * dphi_x / phi + 4
     return u
-
-def BurgersDiscontinuous(x, t, v, a, b):
-    ''' Function to generate analytical solutions of Burgers equation with
-    discontinuous initial condition: u(x, 0) = a*H(-x) + b*H(x). Assumes a > b.
-
-    Source: https://www.iist.ac.in/sites/default/files/people/IN08026/Burgers_equation_viscous.pdf'''
-    c = (a + b) / 2
-    z_a = (x - a * t) / torch.sqrt(4 * v * t)
-    z_b = (x - b * t) / torch.sqrt(4 * v * t)
-    q = torch.erfc(z_b) / torch.erf(z_a)
-
-    u = a - (a - b) / (1 + q * torch.exp(-(a - b)/(2 * v) * (x - c * t)))
-    return u

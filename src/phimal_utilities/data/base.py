@@ -31,6 +31,8 @@ class Dataset:
     @pytorch_func
     def library(self, x, t):
         ''' Returns library with 3rd order derivs and 2nd order polynomial'''
+        assert ((x.shape[1] == 1) & (t.shape[1] == 1)), 'x and t should have shape (n_samples x 1)'
+
         u = self.solution(x, t, **self.parameters)
         u_x = torch.autograd.grad(u, x, torch.ones_like(u), create_graph=True)[0]
         u_xx = torch.autograd.grad(u_x, x, torch.ones_like(u_x), create_graph=True)[0]

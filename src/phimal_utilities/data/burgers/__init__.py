@@ -1,1 +1,1 @@
-from .burgers import BurgersDelta
+from .burgers import BurgersDelta, BurgersCos, BurgersSawtooth, BurgersDiscontinuous

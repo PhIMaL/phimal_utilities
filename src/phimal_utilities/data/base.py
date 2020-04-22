@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from numpy import ndarray
 
 
@@ -55,3 +56,28 @@ class Dataset:
         # Making library
         theta = torch.matmul(poly_library[:, :, None], deriv_library[:, None, :]).reshape(u.shape[0], -1)
         return theta
+
+    def create_dataset(self, x, t, n_samples, noise, random=True):
+        ''' Creates dataset for deepmod. set n_samples=0 for all, noise is percentage of std. '''
+        # Flattening if inputs aren't
+        x_flat = x.reshape(-1, 1)
+        t_flat = x.reshape(-1, 1)
+
+        u = self.generate_solution(x_flat, t_flat)
+
+        X = np.concatenate([t_flat, x_flat], axis=1)
+        y = u + noise * np.std(u, axis=0) * np.random.normal(size=u.shape)
+
+        # creating random idx for samples
+        N = y.shape[0] if n_samples == 0 else n_samples
+
+        if random is True:
+            rand_idx = np.random.permutation(y.shape[0])[:N]
+        else:
+            rand_idx = np.arange(y.shape[0])[:N]
+
+        # Building dataset
+        X_train = torch.tensor(X[rand_idx, :], requires_grad=True, dtype=torch.float32)
+        y_train = torch.tensor(y[rand_idx, :], requires_grad=True, dtype=torch.float32)
+
+        return X_train, y_train

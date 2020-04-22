@@ -29,4 +29,8 @@ np.linalg.lstsq(theta, dt, rcond=None)[0]
 
 
 
-X_train, y_train = dataset.create_dataset(x_grid, t_grid, n_samples=1000, noise=0.05)
+X_train, y_train = dataset.create_dataset(x_grid, t_grid, n_samples=0, noise=0.05)
+
+y_train.shape
+
+from phimal_utilities.analysis import load_tensorboard

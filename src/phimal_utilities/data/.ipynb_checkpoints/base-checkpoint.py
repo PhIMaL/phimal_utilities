@@ -57,7 +57,7 @@ class Dataset:
         theta = torch.matmul(poly_library[:, :, None], deriv_library[:, None, :]).reshape(u.shape[0], -1)
         return theta
 
-    def create_dataset(self, x, t, n_samples, noise, random=True):
+    def create_dataset(self, x, t, n_samples, noise, random=True, return_idx=False):
         ''' Creates dataset for deepmod. set n_samples=0 for all, noise is percentage of std. '''
         assert ((x.shape[1] == 1) & (t.shape[1] == 1)), 'x and t should have shape (n_samples x 1)'
         u = self.generate_solution(x, t)
@@ -76,5 +76,8 @@ class Dataset:
         # Building dataset
         X_train = torch.tensor(X[rand_idx, :], requires_grad=True, dtype=torch.float32)
         y_train = torch.tensor(y[rand_idx, :], requires_grad=True, dtype=torch.float32)
-
-        return X_train, y_train
+        
+        if return_idx is False:
+            return X_train, y_train
+        else:
+            return X_train, y_train, rand_idx

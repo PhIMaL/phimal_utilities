@@ -57,7 +57,7 @@ class Dataset:
         theta = torch.matmul(poly_library[:, :, None], deriv_library[:, None, :]).reshape(u.shape[0], -1)
         return theta
 
-    def create_dataset(self, x, t, n_samples, noise, random=True, return_idx=False):
+    def create_dataset(self, x, t, n_samples, noise, random=True, return_idx=False, random_state=42):
         ''' Creates dataset for deepmod. set n_samples=0 for all, noise is percentage of std. '''
         assert ((x.shape[1] == 1) & (t.shape[1] == 1)), 'x and t should have shape (n_samples x 1)'
         u = self.generate_solution(x, t)
@@ -69,7 +69,7 @@ class Dataset:
         N = y.shape[0] if n_samples == 0 else n_samples
 
         if random is True:
-            rand_idx = np.random.permutation(y.shape[0])[:N]
+            rand_idx = np.random.RandomState(seed=random_state).permutation(y.shape[0])[:N]
         else:
             rand_idx = np.arange(y.shape[0])[:N]
 
@@ -131,8 +131,9 @@ class Dataset_2D:
         theta = torch.matmul(poly_library[:, :, None], deriv_library[:, None, :]).reshape(u.shape[0], -1)
         return theta
 
-    def create_dataset(self, x, t, n_samples, noise, random=True, return_idx=False):
-        ''' Creates dataset for deepmod. set n_samples=0 for all, noise is percentage of std. '''
+    def create_dataset(self, x, t, n_samples, noise, random=True, return_idx=False, random_state=42):
+        ''' Creates dataset for deepmod. set n_samples=0 for all, noise is percentage of std. Random state can
+        be used to generate similar sets for different noise levels'''
         assert ((x.shape[1] == 2) & (t.shape[1] == 1)), 'x and t should have shape (n_samples x 1)'
         u = self.generate_solution(x, t)
 
@@ -143,7 +144,7 @@ class Dataset_2D:
         N = y.shape[0] if n_samples == 0 else n_samples
 
         if random is True:
-            rand_idx = np.random.permutation(y.shape[0])[:N]
+            rand_idx = np.random.RandomState(seed=random_state).permutation(y.shape[0])[:N] # so we can get similar splits for different noise levels
         else:
             rand_idx = np.arange(y.shape[0])[:N]
 

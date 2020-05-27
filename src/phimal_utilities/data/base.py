@@ -57,19 +57,26 @@ class Dataset:
         theta = torch.matmul(poly_library[:, :, None], deriv_library[:, None, :]).reshape(u.shape[0], -1)
         return theta
 
-    def create_dataset(self, x, t, n_samples, noise, random=True, return_idx=False, random_state=42):
+    def create_dataset(self, x, t, n_samples, noise, random=True, return_idx=False, random_state=None):
         ''' Creates dataset for deepmod. set n_samples=0 for all, noise is percentage of std. '''
         assert ((x.shape[1] == 1) & (t.shape[1] == 1)), 'x and t should have shape (n_samples x 1)'
         u = self.generate_solution(x, t)
 
         X = np.concatenate([t, x], axis=1)
-        y = u + noise * np.std(u, axis=0) * np.random.normal(size=u.shape)
+        if random_state is None:
+            y = u + noise * np.std(u, axis=0) * np.random.normal(size=u.shape)
+        else:
+            y = u + noise * np.std(u, axis=0) *  np.random.RandomState(seed=random_state).normal(size=u.shape)
+           
 
         # creating random idx for samples
         N = y.shape[0] if n_samples == 0 else n_samples
 
         if random is True:
-            rand_idx = np.random.RandomState(seed=random_state).permutation(y.shape[0])[:N]
+            if random_state is None:
+                rand_idx = np.random.permutation(y.shape[0])[:N]
+            else:
+                rand_idx = np.random.RandomState(seed=random_state).permutation(y.shape[0])[:N]
         else:
             rand_idx = np.arange(y.shape[0])[:N]
 

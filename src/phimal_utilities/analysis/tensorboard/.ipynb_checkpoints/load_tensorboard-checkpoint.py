@@ -4,11 +4,10 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 from os import listdir
 
 
-def load_tensorboard(path: str) -> pd.DataFrame:
+def load_tensorboard(path):
     '''Function to load tensorboard file from a folder.
     Assumes one file per folder!'''
 
-    assert len(listdir(path)) == 1, 'No or more than one event file found.'
     event_file = next(filter(lambda filename: filename[:6] == 'events', listdir(path)))
     summary_iterator = EventAccumulator(str(path + event_file)).Reload()
 

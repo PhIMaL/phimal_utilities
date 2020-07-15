@@ -1,1 +1,1 @@
-from .kdv import KdVSoliton
+from .kdv import *

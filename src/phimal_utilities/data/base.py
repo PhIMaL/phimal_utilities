@@ -17,6 +17,7 @@ class Dataset:
     def __init__(self, solution, **kwargs):
         self.solution = solution  # set solution
         self.parameters = kwargs  # set solution parameters
+        self.scaling_factor = None
 
     @pytorch_func
     def generate_solution(self, x, t):
@@ -57,7 +58,7 @@ class Dataset:
         theta = torch.matmul(poly_library[:, :, None], deriv_library[:, None, :]).reshape(u.shape[0], -1)
         return theta
 
-    def create_dataset(self, x, t, n_samples, noise, random=True, return_idx=False, random_state=None):
+    def create_dataset(self, x, t, n_samples, noise, random=True, normalize=True, return_idx=False, random_state=None):
         ''' Creates dataset for deepmod. set n_samples=0 for all, noise is percentage of std. '''
         assert ((x.shape[1] == 1) & (t.shape[1] == 1)), 'x and t should have shape (n_samples x 1)'
         u = self.generate_solution(x, t)
@@ -79,11 +80,17 @@ class Dataset:
                 rand_idx = np.random.RandomState(seed=random_state).permutation(y.shape[0])[:N]
         else:
             rand_idx = np.arange(y.shape[0])[:N]
+        
+        # Normalizing
+        if normalize:
+            if (self.scaling_factor is None):
+                self.scaling_factor = (-(np.max(X, axis=0) + np.min(X, axis=0))/2, (np.max(X, axis=0) - np.min(X, axis=0))/2) # only calculate the first time
+            X = (X + self.scaling_factor[0]) / self.scaling_factor[1] 
 
         # Building dataset
-        X_train = torch.tensor(X[rand_idx, :], requires_grad=True, dtype=torch.float32)
-        y_train = torch.tensor(y[rand_idx, :], requires_grad=True, dtype=torch.float32)
-        
+        X_train = torch.tensor(X[rand_idx, :], dtype=torch.float32)
+        y_train = torch.tensor(y[rand_idx, :], dtype=torch.float32)
+
         if return_idx is False:
             return X_train, y_train
         else:

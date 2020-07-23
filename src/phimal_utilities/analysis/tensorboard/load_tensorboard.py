@@ -10,21 +10,20 @@ def load_tensorboard(path):
     event_paths = [file for file in os.walk(path, topdown=True) if file[2][0][:len('events')] == 'events']
 
     df = pd.DataFrame()
-    steps = None  # steps are the same for all files
+    steps = None # steps are the same for all files
 
-    for path in event_paths:
+    for event_idx, path in enumerate(event_paths):
         summary_iterator = EventAccumulator(os.path.join(path[0], path[2][0])).Reload()
         tags = summary_iterator.Tags()['scalars']
         data = [[event.value for event in summary_iterator.Scalars(tag)] for tag in tags]
         if steps is None:
             steps = [event.step for event in summary_iterator.Scalars(tags[0])]
-
+        
         # Adding to dataframe
-        tags = [tag.replace('/', '_') for tag in tags]  # for name consistency
-        if len(path[1]) == 0:  # if its the lowest level, use directory name as tag
+        tags = [tag.replace('/', '_') for tag in tags] # for name consistency
+        if event_idx > 1: # We have one file in the top level, so after we need to use folder name
             tags = [path[0].split('/')[-1]]
-
+        
         for idx, tag in enumerate(tags):
             df[tag] = data[idx]
-
     return df

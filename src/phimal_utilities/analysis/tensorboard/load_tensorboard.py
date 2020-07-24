@@ -26,5 +26,6 @@ def load_tensorboard(path):
         
         for idx, tag in enumerate(tags):
             df[tag] = data[idx]
+        df.index = steps
     return df
     

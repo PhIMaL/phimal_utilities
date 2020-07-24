@@ -21,9 +21,10 @@ def load_tensorboard(path):
         
         # Adding to dataframe
         tags = [tag.replace('/', '_') for tag in tags] # for name consistency
-        if event_idx > 1: # We have one file in the top level, so after we need to use folder name
+        if event_idx > 0: # We have one file in the top level, so after we need to use folder name
             tags = [path[0].split('/')[-1]]
         
         for idx, tag in enumerate(tags):
             df[tag] = data[idx]
     return df
+    
